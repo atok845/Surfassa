@@ -9,15 +9,20 @@ requirements = python3,kivy
 orientation = portrait
 osx.kivy_version = 2.1.0
 
-# Adicione isso se quiser um ícone customizado
+# Ícone customizado (opcional)
 # icon.filename = %(source.dir)s/icon.png
 
 [buildozer]
 log_level = 2
 warn_on_root = 1
 
-# Diretório do Android SDK que instalamos manualmente no workflow
+# SDK instalado via workflow
 android.sdk_path = /home/runner/android-sdk
 
-# Garante que o Buildozer não tente baixar SDK duplicado
+# NDK será baixado automaticamente
 android.accept_sdk_license = true
+
+# Versões fixas e compatíveis
+android.api = 33
+android.minapi = 21
+android.build_tools_version = 33.0.2
