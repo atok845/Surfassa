@@ -3,26 +3,25 @@
         export ANDROID_SDK_ROOT=$HOME/android-sdk
         export PATH=$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$ANDROID_SDK_ROOT/platform-tools:$PATH
 
+        # Baixar e configurar o Android Command Line Tools
         mkdir -p $ANDROID_SDK_ROOT/cmdline-tools
         cd $ANDROID_SDK_ROOT/cmdline-tools
-
-        # Baixar e configurar o Android Command Line Tools
         wget https://dl.google.com/android/repository/commandlinetools-linux-10406996_latest.zip -O tools.zip
         unzip tools.zip
         mv cmdline-tools latest
 
-        # Aceitar licenças e instalar componentes necessários
+        # Aceitar licenças e instalar SDK + Build Tools
         yes | $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --sdk_root=$ANDROID_SDK_ROOT --licenses
         $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --sdk_root=$ANDROID_SDK_ROOT \
-          "platform-tools" "platforms;android-33" "build-tools;33.0.2"
+          "platform-tools" "platforms;android-34" "build-tools;36.0.0"
 
-        # Copiar o SDK completo para o local esperado pelo Buildozer
+        # Copiar SDK completo para o local que o Buildozer espera
         mkdir -p /home/runner/.buildozer/android/platform/
         cp -r $ANDROID_SDK_ROOT /home/runner/.buildozer/android/platform/android-sdk
 
-        # Garantir que 'aidl' seja executável
-        chmod +x /home/runner/.buildozer/android/platform/android-sdk/build-tools/33.0.2/aidl
+        # Tornar o AIDL executável
+        chmod +x /home/runner/.buildozer/android/platform/android-sdk/build-tools/36.0.0/aidl
 
-        # Voltar para o projeto e rodar o build
+        # Voltar para o projeto e compilar
         cd $GITHUB_WORKSPACE
         buildozer android debug
