@@ -1,27 +1,58 @@
-    - name: Install Android SDK and Build APK
+name: Build APK
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+
+    - name: Install dependencies
+      run: |
+        sudo apt update
+        sudo apt install -y zip unzip openjdk-17-jdk python3-pip libgl1-mesa-dev
+        pip install --upgrade pip
+        pip install cython buildozer
+
+    - name: Install Android SDK
       run: |
         export ANDROID_SDK_ROOT=$HOME/android-sdk
-        export PATH=$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$ANDROID_SDK_ROOT/platform-tools:$PATH
-
-        # Baixar e configurar o Android Command Line Tools
         mkdir -p $ANDROID_SDK_ROOT/cmdline-tools
         cd $ANDROID_SDK_ROOT/cmdline-tools
+
         wget https://dl.google.com/android/repository/commandlinetools-linux-10406996_latest.zip -O tools.zip
         unzip tools.zip
         mv cmdline-tools latest
 
-        # Aceitar licenças e instalar SDK + Build Tools
+        export PATH=$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$ANDROID_SDK_ROOT/platform-tools:$PATH
+
         yes | $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --sdk_root=$ANDROID_SDK_ROOT --licenses
         $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --sdk_root=$ANDROID_SDK_ROOT \
           "platform-tools" "platforms;android-34" "build-tools;36.0.0"
 
-        # Copiar SDK completo para o local que o Buildozer espera
+        # Copia o SDK inteiro para onde o Buildozer espera
         mkdir -p /home/runner/.buildozer/android/platform/
         cp -r $ANDROID_SDK_ROOT /home/runner/.buildozer/android/platform/android-sdk
 
-        # Tornar o AIDL executável
         chmod +x /home/runner/.buildozer/android/platform/android-sdk/build-tools/36.0.0/aidl
 
-        # Voltar para o projeto e compilar
-        cd $GITHUB_WORKSPACE
+    - name: Build APK
+      run: |
         buildozer android debug
+
+    - name: Upload APK
+      uses: actions/upload-artifact@v3
+      with:
+        name: app-debug
+        path: bin/*.apk
