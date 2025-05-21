@@ -1,4 +1,4 @@
-name: Build APK
+name: Build APK with Buildozer
 
 on:
   push:
@@ -10,46 +10,41 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.10'
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
 
-    - name: Install dependencies
-      run: |
-        sudo apt update
-        sudo apt install -y python3-pip python3-setuptools git zip unzip wget openjdk-17-jdk
-        pip install --upgrade pip
-        pip install buildozer cython
+      - name: Install dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y python3-pip python3-setuptools git zip unzip openjdk-17-jdk
+          pip install --upgrade pip
+          pip install buildozer cython
 
-    - name: Install Android SDK
-      run: |
-        mkdir -p $HOME/android-sdk/cmdline-tools
-        cd $HOME/android-sdk/cmdline-tools
+      - name: Install Android SDK
+        run: |
+          mkdir -p "$HOME/android-sdk/cmdline-tools"
+          cd "$HOME/android-sdk/cmdline-tools"
+          wget https://dl.google.com/android/repository/commandlinetools-linux-10406996_latest.zip -O tools.zip
+          unzip tools.zip -d latest
+          export ANDROID_SDK_ROOT=$HOME/android-sdk
+          export PATH=$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$PATH
+          yes | sdkmanager --licenses
+          sdkmanager "platforms;android-34" "platform-tools" "build-tools;34.0.0"
 
-        # Baixar o SDK e extrair na pasta correta
-        wget https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip -O sdk.zip
-        unzip sdk.zip -d cmdline-tools
-        mv cmdline-tools $HOME/android-sdk/cmdline-tools/latest
+      - name: Build APK
+        run: |
+          export ANDROIDSDK=$HOME/android-sdk
+          export PATH=$ANDROIDSDK/cmdline-tools/latest/bin:$PATH
+          export PATH=$ANDROIDSDK/platform-tools:$PATH
+          buildozer android debug
 
-        echo "ANDROID_HOME=$HOME/android-sdk" >> $GITHUB_ENV
-        echo "$HOME/android-sdk/cmdline-tools/latest/bin" >> $GITHUB_PATH
-        echo "$HOME/android-sdk/platform-tools" >> $GITHUB_PATH
-
-    - name: Accept licenses and install packages
-      run: |
-        sdkmanager --licenses
-        sdkmanager "platform-tools" "platforms;android-34" "build-tools;34.0.0"
-
-    - name: Build APK
-      run: |
-        buildozer android debug
-
-    - name: Upload APK
-      uses: actions/upload-artifact@v4
-      with:
-        name: Surfassa-APK
-        path: bin/*.apk
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: my-app-apk
+          path: bin/*.apk
