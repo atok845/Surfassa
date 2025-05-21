@@ -33,7 +33,8 @@ jobs:
         unzip tools.zip -d latest
         export ANDROID_SDK_ROOT=$HOME/android-sdk
         export PATH=$ANDROID_SDsdkmanager --licensesK_ROOT/cmdline-tools/latest/bin:$PATH
-        yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses
+        yes | ${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager --licenses
+ --licenses
         sdkmanager "platforms;android-34" "platform-tools" "build-tools;34.0.0"
 
     - name: Build APK
