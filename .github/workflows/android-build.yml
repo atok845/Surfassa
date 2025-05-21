@@ -1,31 +1,4 @@
-name: Build APK
-
-on:
-  push:
-    branches: [main]
-  workflow_dispatch:
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v3
-
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.10'
-
-    - name: Install Buildozer and dependencies
-      run: |
-        sudo apt update
-        sudo apt install -y python3-pip python3-setuptools git zip unzip openjdk-17-jdk
-        pip install --upgrade pip
-        pip install buildozer cython
-
-    - name: Install Android SDK and Build APK
+         - name: Install Android SDK and Build APK
       run: |
         export ANDROID_SDK_ROOT=$HOME/android-sdk
         export PATH=$ANDROID_SDK_ROOT/cmdline-tools/latest/bin:$ANDROID_SDK_ROOT/platform-tools:$PATH
@@ -33,22 +6,20 @@ jobs:
         mkdir -p $ANDROID_SDK_ROOT/cmdline-tools
         cd $ANDROID_SDK_ROOT/cmdline-tools
 
+        # Baixar e configurar o Android Command Line Tools
         wget https://dl.google.com/android/repository/commandlinetools-linux-10406996_latest.zip -O tools.zip
         unzip tools.zip
         mv cmdline-tools latest
 
+        # Aceitar licenças e instalar componentes necessários
         yes | $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --sdk_root=$ANDROID_SDK_ROOT --licenses
-        $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --sdk_root=$ANDROID_SDK_ROOT "platform-tools" "platforms;android-33" "build-tools;33.0.2"
+        $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --sdk_root=$ANDROID_SDK_ROOT \
+          "platform-tools" "platforms;android-33" "build-tools;33.0.2"
 
-        # Corrigir Buildozer para enxergar SDK instalado manualmente
-        mkdir -p ~/.buildozer/android/platform/
-        ln -sfn $ANDROID_SDK_ROOT ~/.buildozer/android/platform/android-sdk
+        # Corrigir a estrutura para o Buildozer encontrar o AIDL corretamente
+        mkdir -p /home/runner/.buildozer/android/platform/android-sdk/build-tools
+        cp -r $ANDROID_SDK_ROOT/build-tools/33.0.2 /home/runner/.buildozer/android/platform/android-sdk/build-tools/
 
+        # Rodar o build
         cd $GITHUB_WORKSPACE
         buildozer android debug
-
-    - name: Upload APK
-      uses: actions/upload-artifact@v4
-      with:
-        name: CalculadoraSurfacagem-APK
-        path: bin/*.apk
