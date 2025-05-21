@@ -1,25 +1,41 @@
 [app]
-title = Calculadora Surfacagem
-package.name = calculadorasurfacagem
-package.domain = org.kivy
+title = NomeDoSeuApp
+package.name = nome_do_pacote
+package.domain = org.exemplo
+
 source.dir = .
 source.include_exts = py,png,jpg,kv,atlas
-version = 0.1
+version = 1.0
 requirements = python3,kivy
+
 orientation = portrait
-osx.kivy_version = 2.1.0
+
+osx.kivy_version = 2.3.0
+
+fullscreen = 1
 
 [buildozer]
 log_level = 2
 warn_on_root = 1
 
-# Caminho do SDK manual
-android.sdk_path = /home/runner/android-sdk
+# Diretório onde o SDK será copiado no GitHub Actions
+android.sdk_path = ~/.buildozer/android/platform/android-sdk
 
-# Versões fixas para evitar erro de AIDL
-android.api = 33
+# Usa a API 34, compatível com Build Tools 36.0.0
+android.api = 34
+android.build_tools_version = 36.0.0
+
+# Arquitetura padrão para compatibilidade ampla
+android.archs = armeabi-v7a
+
+# Otimiza build para debug (você pode mudar para release depois)
 android.minapi = 21
-android.build_tools_version = 33.0.2
 
-# Aceitar automaticamente as licenças
-android.accept_sdk_license = true
+# Desativa build remoto (usamos local via GitHub Actions)
+android.accept_sdk_license = True
+android.ndk = 25b
+android.ndk_path = 
+
+[android]
+# Caso seu app use permissões (como internet), descomente abaixo
+# android.permissions = INTERNET
