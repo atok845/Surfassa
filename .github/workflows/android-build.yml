@@ -11,18 +11,18 @@
         unzip tools.zip
         mv cmdline-tools latest
 
-        # Aceitar licenças e instalar componentes
+        # Aceitar licenças e instalar componentes necessários
         yes | $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --sdk_root=$ANDROID_SDK_ROOT --licenses
         $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --sdk_root=$ANDROID_SDK_ROOT \
           "platform-tools" "platforms;android-33" "build-tools;33.0.2"
 
-        # Corrigir estrutura esperada pelo Buildozer
-        mkdir -p /home/runner/.buildozer/android/platform/android-sdk/build-tools
-        cp -r $ANDROID_SDK_ROOT/build-tools/33.0.2/* /home/runner/.buildozer/android/platform/android-sdk/build-tools/
+        # Copiar o SDK completo para o local esperado pelo Buildozer
+        mkdir -p /home/runner/.buildozer/android/platform/
+        cp -r $ANDROID_SDK_ROOT /home/runner/.buildozer/android/platform/android-sdk
 
-        # Tornar aidl executável
-        chmod +x /home/runner/.buildozer/android/platform/android-sdk/build-tools/aidl
+        # Garantir que 'aidl' seja executável
+        chmod +x /home/runner/.buildozer/android/platform/android-sdk/build-tools/33.0.2/aidl
 
-        # Rodar build
+        # Voltar para o projeto e rodar o build
         cd $GITHUB_WORKSPACE
         buildozer android debug
